@@ -1,6 +1,6 @@
 # PHP LocationIQ & Nominatim SDK
 
-**SDK PHP pour l'intégration des services LocationIQ (Balance, Timezone, Directions) et Nominatim (Reverse Geocoding).**
+**SDK PHP pour l'intégration des services LocationIQ (Balance, Timezone, Directions, Matrix) et Nominatim (Reverse Geocoding).**
 
 [![PHP Version](https://img.shields.io/badge/PHP-%5E8.2-blue.svg)](https://www.php.net/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -17,6 +17,7 @@
   - [Récupérer le solde](#1-récupérer-le-solde)
   - [Résoudre un fuseau horaire](#2-résoudre-un-fuseau-horaire)
   - [Calculer un itinéraire](#3-calculer-un-itinéraire)
+  - [Calculer une matrice de durées et distances](#4-calculer-une-matrice-de-durées-et-distances)
 - [Opérations Nominatim](#opérations-nominatim)
   - [Reverse Geocoding](#1-reverse-geocoding)
 - [Value Objects](#value-objects)
@@ -42,17 +43,17 @@ Nominatim est le service de géocodage officiel d'OpenStreetMap. Il propose du g
 
 Ce SDK transforme les appels HTTP bruts vers LocationIQ et Nominatim en **objets PHP typés, validés et documentés**. Il expose deux clients haut niveau :
 
-- **`LocationIqClient`** — pour les services Balance, Timezone et Directions.
+- **`LocationIqClient`** — pour les services Balance, Timezone, Directions et Matrix.
 - **`NominatimClient`** — pour le reverse geocoding OpenStreetMap.
 
 ### Bénéfices
 
 | Sans SDK | Avec SDK |
 |----------|----------|
-| `json_decode()` manuel | Objets PHP typés (`TimezoneData`, `BalanceData`, `DirectionsData`, `ReverseData`) |
-| Validation manuelle | Value Objects auto-validants (`LocationVO`, `BoundingBoxVO`) |
-| Strings magiques | Enums (`DirectionsProfile`, `OverviewType`, `GeometriesType`, `NominatimFormat`) |
-| Tableaux imbriqués non typés | Collections et Graphs typés (`WaypointGraphCollection`, `AddressGraph`) |
+| `json_decode()` manuel | Objets PHP typés (`TimezoneData`, `BalanceData`, `DirectionsData`, `MatrixResponseData`, `ReverseData`) |
+| Validation manuelle | Value Objects auto-validants (`LocationVO`, `BoundingBoxVO`, `MatrixOptionsVO`, `FloatMatrixVO`) |
+| Strings magiques | Enums (`DirectionsProfile`, `OverviewType`, `GeometriesType`, `MatrixAnnotation`, `FallbackCoordinate`, `NominatimFormat`) |
+| Tableaux imbriqués non typés | Collections et Graphs typés (`WaypointGraphCollection`, `FloatMatrixCollection`, `AddressGraph`) |
 | Mélange HTTP / parsing | Séparation stricte `Request` / `Response` / `Graph` / `Data` |
 | Format polymorphe ignoré | Détection automatique objet vs. tableau |
 | Erreurs HTTP non gérées | `hasError()` / `getError()` uniformes |
@@ -146,7 +147,7 @@ $client->setBaseUrl(LocationIqBaseUrl::EU1);
 ┌──────────────────────────┐         ┌──────────────────────────┐
 │     LocationIqClient     │         │     NominatimClient      │
 │  (Balance / Timezone /   │         │  (Reverse Geocoding)     │
-│   Directions)            │         │                          │
+│   Directions / Matrix)   │         │                          │
 └─────────────┬────────────┘         └─────────────┬────────────┘
               │                                    │
               ▼                                    ▼
@@ -167,14 +168,14 @@ $client->setBaseUrl(LocationIqBaseUrl::EU1);
 | Couche | Composant | Rôle |
 |--------|-----------|------|
 | Client | `LocationIqClient`, `NominatimClient` | Communication HTTP, `Record` → `Response` |
-| Requests | `BalanceRequest`, `TimezoneRequest`, `DirectionsRequest`, `ReverseRequest` | Construction des URLs et query strings |
-| Responses | `BalanceResponse`, `TimezoneResponse`, `DirectionsResponse`, `ReverseResponse` | Parsing et hydratation des réponses |
-| Records | `TimezoneRecord`, `DirectionsRecord`, `ReverseRecord` | Entrées des clients |
-| Datas | `TimezoneData`, `BalanceData`, `DirectionsData`, `ReverseData`, `AddressData` | Sorties typées métier |
+| Requests | `BalanceRequest`, `TimezoneRequest`, `DirectionsRequest`, `MatrixRequest`, `ReverseRequest` | Construction des URLs et query strings |
+| Responses | `BalanceResponse`, `TimezoneResponse`, `DirectionsResponse`, `MatrixResponse`, `ReverseResponse` | Parsing et hydratation des réponses |
+| Records | `TimezoneRecord`, `DirectionsRecord`, `MatrixRecord`, `ReverseRecord` | Entrées des clients |
+| Datas | `TimezoneData`, `BalanceData`, `DirectionsData`, `MatrixResponseData`, `MatrixWaypointData`, `ReverseData`, `AddressData` | Sorties typées métier |
 | Graphs | `WaypointGraph`, `RouteGraph`, `LegGraph`, `StepGraph`, `ManeuverGraph`, `IntersectionGraph`, `AddressGraph`, `ReverseGraph` | Portions de réponse |
-| Collections | `WaypointGraphCollection`, `RouteGraphCollection`, `LegGraphCollection`, `StepGraphCollection`, `IntersectionGraphCollection`, `LocationVOCollection` | Ensembles typés |
-| Value Objects | `LocationVO`, `BoundingBoxVO` | Coordonnées validées |
-| Enums | `LocationIqBaseUrl`, `DirectionsProfile`, `OverviewType`, `GeometriesType`, `Endpoint`, `NominatimBaseUrl`, `NominatimEndpoint`, `NominatimFormat` | Choix typés |
+| Collections | `WaypointGraphCollection`, `RouteGraphCollection`, `LegGraphCollection`, `StepGraphCollection`, `IntersectionGraphCollection`, `LocationVOCollection`, `MatrixAnnotationCollection`, `FloatMatrixCollection`, `FloatTypedCollection`, `IntTypedCollection`, `MatrixWaypointDataCollection` | Ensembles typés |
+| Value Objects | `LocationVO`, `BoundingBoxVO`, `MatrixOptionsVO`, `FloatMatrixVO` | Coordonnées et options validées |
+| Enums | `LocationIqBaseUrl`, `DirectionsProfile`, `OverviewType`, `GeometriesType`, `MatrixAnnotation`, `FallbackCoordinate`, `Endpoint`, `NominatimBaseUrl`, `NominatimEndpoint`, `NominatimFormat` | Choix typés |
 
 ---
 
@@ -349,6 +350,177 @@ foreach ($response->getRoutes() as $route) {
 
 ---
 
+### 4. Calculer une matrice de durées et distances
+
+Calcule les durées et/ou distances des trajets les plus rapides entre **toutes les paires** de coordonnées fournies. Utile pour comparer rapidement plusieurs points (livraisons, tournées, répartition géographique).
+
+**Endpoint :** `GET /v1/matrix/{profile}/{coordinates}`
+
+> ⚠️ Les coordonnées doivent être fournies dans l'ordre **`longitude,latitude`** — comme pour Directions.
+
+#### Exemple minimal — matrice 3×3 de durées
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use AndyDefer\PhpLocationIq\Collections\LocationVOCollection;
+use AndyDefer\PhpLocationIq\Records\MatrixRecord;
+use AndyDefer\PhpLocationIq\ValueObjects\LocationVO;
+use AndyDefer\PhpLocationIq\ValueObjects\MatrixOptionsVO;
+
+$coordinates = new LocationVOCollection;
+$coordinates->add(LocationVO::fromArray([-0.127627, 51.503355]));
+$coordinates->add(LocationVO::fromArray([-0.087199, 51.509562]));
+$coordinates->add(LocationVO::fromArray([-0.142001, 51.501284]));
+
+$options = MatrixOptionsVO::create(coordinates: $coordinates);
+
+$response = $client->getMatrix(new MatrixRecord(options: $options));
+
+if ($response->hasError()) {
+    throw new RuntimeException($response->getError());
+}
+
+$durations = $response->getDurations();
+
+if ($durations !== null) {
+    foreach ($durations->getRows() as $rowIndex => $row) {
+        foreach ($row as $colIndex => $value) {
+            if ($durations->isNoRoute($rowIndex, $colIndex)) {
+                echo "[$rowIndex][$colIndex] : pas de route\n";
+                continue;
+            }
+
+            echo sprintf("[%d][%d] : %.1f s\n", $rowIndex, $colIndex, $value);
+        }
+    }
+}
+```
+
+#### Demander durées **et** distances
+
+```php
+use AndyDefer\PhpLocationIq\Collections\MatrixAnnotationCollection;
+use AndyDefer\PhpLocationIq\Enums\MatrixAnnotation;
+
+$annotations = new MatrixAnnotationCollection;
+$annotations->add(MatrixAnnotation::DURATION);
+$annotations->add(MatrixAnnotation::DISTANCE);
+
+$options = MatrixOptionsVO::create(
+    coordinates: $coordinates,
+    annotations: $annotations,
+);
+
+$response = $client->getMatrix(new MatrixRecord(options: $options));
+
+$durations = $response->getDurations(); // secondes
+$distances = $response->getDistances(); // mètres
+```
+
+#### Restreindre les sources et destinations
+
+Par défaut, LocationIQ calcule la matrice complète `N×N`. Tu peux restreindre avec des index de coordonnées :
+
+```php
+use AndyDefer\DomainStructures\Collections\Utility\IntTypedCollection;
+
+$sources = new IntTypedCollection;
+$sources->add(0);      // utilise uniquement la coordonnée #0 comme source
+
+$options = MatrixOptionsVO::create(
+    coordinates: $coordinates,
+    sources: $sources,
+);
+
+// Résultat : matrice 1×3 au lieu de 3×3
+```
+
+C'est utile quand tu as un entrepôt fixe et plusieurs destinations. Tu économises du quota et du temps de calcul.
+
+#### Options complètes
+
+| Paramètre | Type | Valeurs | Description |
+|-----------|------|---------|-------------|
+| `$coordinates` | `LocationVOCollection` | 2 à 25 coordonnées | Points à comparer |
+| `$profile` | `DirectionsProfile` | `DRIVING`, `WALKING` | Profil de transport (sur `MatrixRecord`) |
+| `$annotations` | `MatrixAnnotationCollection` | `DURATION`, `DISTANCE` | Matrices à calculer (au moins une) |
+| `$sources` | `?IntTypedCollection` | Index 0..N-1 | Restreindre les sources |
+| `$destinations` | `?IntTypedCollection` | Index 0..N-1 | Restreindre les destinations |
+| `$fallbackSpeed` | `?float` | > 0 | Vitesse de secours (m/s) pour les paires non routables |
+| `$fallbackCoordinate` | `?FallbackCoordinate` | `INPUT`, `SNAPPED` | Coordonnée utilisée en mode fallback |
+
+#### Fallback : que faire quand aucune route n'existe ?
+
+Par défaut, si LocationIQ ne trouve pas de route entre deux points, la cellule est **`null`**. Avec un `fallbackSpeed`, il calcule la distance à vol d'oiseau et divise par cette vitesse pour estimer une durée :
+
+```php
+use AndyDefer\PhpLocationIq\Enums\FallbackCoordinate;
+
+$options = MatrixOptionsVO::create(
+    coordinates: $coordinates,
+    fallbackSpeed: 15.5,                                // 15.5 m/s ≈ 56 km/h
+    fallbackCoordinate: FallbackCoordinate::SNAPPED,    // utilise la coordonnée snappée
+);
+```
+
+- **`INPUT`** : utilise la coordonnée que tu as envoyée.
+- **`SNAPPED`** : utilise la coordonnée projetée sur le réseau routier le plus proche (plus cohérent avec le reste de la matrice).
+
+Le fallback garantit qu'aucune cellule n'est vide — tu obtiens toujours une estimation, jamais un trou.
+
+#### Lire une cellule précise
+
+Le VO `FloatMatrixVO` expose deux helpers pour lire une cellule et tester le sentinel :
+
+```php
+$durations = $response->getDurations();
+
+if ($durations !== null) {
+    $value = $durations->getCell(0, 1);          // float ou NO_ROUTE_SENTINEL (-1.0)
+    $noRoute = $durations->isNoRoute(0, 1);      // bool
+}
+```
+
+#### Champs du `MatrixResponseData` retourné
+
+| Propriété | Type | Description |
+|-----------|------|-------------|
+| `$durations` | `?FloatMatrixVO` | Matrice des durées en secondes, ou `null` |
+| `$distances` | `?FloatMatrixVO` | Matrice des distances en mètres, ou `null` |
+| `$sources` | `MatrixWaypointDataCollection` | Waypoints sources résolus (nom, coordonnée snappée, distance au point saisi) |
+| `$destinations` | `MatrixWaypointDataCollection` | Waypoints destinations résolus |
+| `$error` | `?string` | Code d'erreur (`NoTable`, `NotImplemented`) ou `null` |
+
+#### Champs d'un `MatrixWaypointData`
+
+| Propriété | Type | Description |
+|-----------|------|-------------|
+| `$name` | `?string` | Nom du lieu le plus proche (`Downing Street`) |
+| `$distance` | `?float` | Distance entre la coordonnée saisie et la coordonnée snappée, en mètres |
+| `$longitude` | `?float` | Longitude de la coordonnée snappée |
+| `$latitude` | `?float` | Latitude de la coordonnée snappée |
+| `$hint` | `?string` | Hint opaque retourné par LocationIQ |
+
+#### Points importants
+
+- **La matrice n'est pas symétrique.** `durations[0][1]` peut différer de `durations[1][0]` à cause des sens uniques, priorités aux carrefours et feux de circulation. C'est la réalité du trafic — et c'est précisément l'intérêt de l'endpoint Matrix.
+- **La diagonale est toujours à `0.0`.** Le trajet d'un point vers lui-même est nul.
+- **Les distances ne sont pas à vol d'oiseau.** Ce sont les longueurs du chemin routier le plus rapide.
+- **2 à 25 coordonnées.** Une `InvalidArgumentException` est levée au-delà.
+- **Au moins une annotation.** `DURATION` est la valeur par défaut.
+
+#### Codes d'erreur spécifiques
+
+| Code | Signification |
+|------|---------------|
+| `NoTable` | Aucune route trouvée entre les coordonnées fournies |
+| `NotImplemented` | La requête n'est pas supportée pour ce profil ou ces options |
+
+---
+
 ## Opérations Nominatim
 
 ### 1. Reverse Geocoding
@@ -455,6 +627,8 @@ Les Value Objects valident les données à leur construction. Une valeur invalid
 |----|------------|---------|
 | `LocationVO` | Exactement 2 floats numériques, ordre `[longitude, latitude]` | `LocationVO::fromArray([15.3222, -4.3250])` |
 | `BoundingBoxVO` | Exactement 4 floats numériques, ordre `[minLat, maxLat, minLon, maxLon]` | `BoundingBoxVO::fromArray([-4.36, -4.35, 15.21, 15.22])` |
+| `MatrixOptionsVO` | 2 à 25 coordonnées, au moins une annotation, index sources/destinations dans la plage, `fallbackSpeed > 0` | `MatrixOptionsVO::create(coordinates: $coords)` |
+| `FloatMatrixVO` | Matrice rectangulaire (toutes les lignes ont la même longueur) | `new FloatMatrixVO($rows)` |
 
 ### Exemple d'utilisation
 
@@ -476,6 +650,14 @@ echo $bbox->getMinLongitude(); // 15.2171
 echo $bbox->getMaxLongitude(); // 15.2186
 ```
 
+### Constantes exposées
+
+| VO | Constante | Valeur | Description |
+|----|-----------|--------|-------------|
+| `MatrixOptionsVO` | `MIN_COORDINATES` | `2` | Nombre minimum de coordonnées acceptées |
+| `MatrixOptionsVO` | `MAX_COORDINATES` | `25` | Nombre maximum de coordonnées acceptées |
+| `FloatMatrixVO` | `NO_ROUTE_SENTINEL` | `-1.0` | Valeur utilisée pour les cellules sans route |
+
 ---
 
 ## Enums
@@ -486,7 +668,9 @@ echo $bbox->getMaxLongitude(); // 15.2186
 | `DirectionsProfile` | Modes de transport | `DRIVING`, `WALKING` |
 | `OverviewType` | Précision de la géométrie | `SIMPLIFIED`, `FULL`, `FALSE` |
 | `GeometriesType` | Format de la géométrie | `POLYLINE`, `POLYLINE6`, `GEOJSON` |
-| `Endpoint` | Chemins d'API LocationIQ | `TIMEZONE`, `DIRECTIONS`, `BALANCE` |
+| `MatrixAnnotation` | Matrices à calculer pour l'endpoint Matrix | `DURATION`, `DISTANCE` |
+| `FallbackCoordinate` | Coordonnée utilisée en mode fallback | `INPUT`, `SNAPPED` |
+| `Endpoint` | Chemins d'API LocationIQ | `TIMEZONE`, `DIRECTIONS`, `MATRIX`, `BALANCE` |
 | `NominatimBaseUrl` | URLs Nominatim | `PUBLIC` |
 | `NominatimEndpoint` | Chemins d'API Nominatim | `REVERSE` |
 | `NominatimFormat` | Formats de réponse Nominatim | `JSON`, `JSONV2`, `GEOJSON`, `GEOCODEJSON` |
@@ -506,6 +690,7 @@ Aucune exception métier n'est levée pour les erreurs renvoyées par LocationIQ
 | 403 | `Access restricted` | Clé non autorisée pour l'endpoint |
 | 404 | `Unable to geocode` | Aucun résultat pour ces coordonnées |
 | 429 | `Rate Limited Day` | Quota journalier épuisé |
+| 429 | `Rate Limited Second` | Trop de requêtes dans la même seconde |
 | 500 | `Unknown error - Please try again after some time` | Erreur serveur |
 
 ### Codes d'erreur Nominatim
@@ -517,7 +702,7 @@ Aucune exception métier n'est levée pour les erreurs renvoyées par LocationIQ
 | 429 | (message Nominatim) | Trop de requêtes |
 | 500 | (message Nominatim) | Erreur serveur |
 
-### Erreur Directions (HTTP 200)
+### Erreurs Directions et Matrix (HTTP 200)
 
 LocationIQ peut renvoyer un code d'erreur dans le champ `code` même avec un HTTP 200 :
 
@@ -527,7 +712,23 @@ $response = $client->getDirections($record);
 if ($response->hasError()) {
     echo $response->getError(); // 'InvalidOptions'
 }
+
+$response = $client->getMatrix($matrixRecord);
+
+if ($response->hasError()) {
+    echo $response->getError(); // 'NoTable' ou 'NotImplemented'
+}
 ```
+
+### Rate limiting
+
+LocationIQ impose un délai minimum entre deux requêtes consécutives sur les plans gratuits (`Rate Limited Second`). Sur les plans payants, cette limite disparaît. Si tu enchaînes plusieurs appels (par exemple plusieurs `getMatrix()`), ajoute un délai :
+
+```php
+usleep(1_100_000); // 1,1 seconde
+```
+
+Nominatim applique la même politique : **une requête par seconde maximum**. Ne jamais paralléliser les appels Nominatim.
 
 ### Erreurs de validation côté SDK
 
@@ -535,6 +736,13 @@ if ($response->hasError()) {
 |-----------|-----------|---------|
 | Coordonnées Directions < 2 | `InvalidArgumentException` | `Directions require at least 2 coordinates.` |
 | Coordonnées Directions > 25 | `InvalidArgumentException` | `Directions accept at most 25 coordinates, {n} given.` |
+| Coordonnées Matrix < 2 | `InvalidArgumentException` | `Matrix requires at least 2 coordinates, {n} given.` |
+| Coordonnées Matrix > 25 | `InvalidArgumentException` | `Matrix accepts at most 25 coordinates, {n} given.` |
+| Annotations Matrix vides | `InvalidArgumentException` | `Matrix requires at least one annotation (duration or distance).` |
+| Index source Matrix hors plage | `InvalidArgumentException` | `Matrix sources index {i} is out of range [0, {max}].` |
+| Index destination Matrix hors plage | `InvalidArgumentException` | `Matrix destinations index {i} is out of range [0, {max}].` |
+| Vitesse fallback Matrix ≤ 0 | `InvalidArgumentException` | `Matrix fallback_speed must be greater than 0, {value} given.` |
+| Matrice non rectangulaire | `InvalidArgumentException` | `Matrix rows must have the same length. Expected {n}, got {m}.` |
 | Coordonnées LocationVO ≠ 2 floats | `InvalidArgumentException` | `Location must contain exactly 2 floats, {n} given.` |
 | Coordonnée LocationVO non numérique | `InvalidArgumentException` | `Location coordinate must be numeric, {type} given.` |
 | BoundingBoxVO ≠ 4 floats | `InvalidArgumentException` | `BoundingBox must contain exactly 4 floats, {n} given.` |
@@ -683,6 +891,7 @@ Documentation détaillée de chaque composant :
 - [`BalanceRequest`](docs/requests/BalanceRequest.md)
 - [`TimezoneRequest`](docs/requests/TimezoneRequest.md)
 - [`DirectionsRequest`](docs/requests/DirectionsRequest.md)
+- [`MatrixRequest`](docs/requests/MatrixRequest.md)
 - [`ReverseRequest`](docs/requests/ReverseRequest.md)
 
 ### Responses
@@ -690,16 +899,20 @@ Documentation détaillée de chaque composant :
 - [`BalanceResponse`](docs/responses/BalanceResponse.md)
 - [`TimezoneResponse`](docs/responses/TimezoneResponse.md)
 - [`DirectionsResponse`](docs/responses/DirectionsResponse.md)
+- [`MatrixResponse`](docs/responses/MatrixResponse.md)
 - [`ReverseResponse`](docs/responses/ReverseResponse.md)
 
 ### Records & Data
 
 - [`TimezoneRecord`](docs/records/TimezoneRecord.md)
 - [`DirectionsRecord`](docs/records/DirectionsRecord.md)
+- [`MatrixRecord`](docs/records/MatrixRecord.md)
 - [`ReverseRecord`](docs/records/ReverseRecord.md)
 - [`TimezoneData`](docs/datas/TimezoneData.md)
 - [`BalanceData`](docs/datas/BalanceData.md)
 - [`DirectionsData`](docs/datas/DirectionsData.md)
+- [`MatrixResponseData`](docs/datas/MatrixResponseData.md)
+- [`MatrixWaypointData`](docs/datas/MatrixWaypointData.md)
 - [`ReverseData`](docs/datas/ReverseData.md)
 - [`AddressData`](docs/datas/AddressData.md)
 
@@ -707,10 +920,14 @@ Documentation détaillée de chaque composant :
 
 - [`LocationVO`](docs/value-objects/LocationVO.md)
 - [`BoundingBoxVO`](docs/value-objects/BoundingBoxVO.md)
+- [`MatrixOptionsVO`](docs/value-objects/MatrixOptionsVO.md)
+- [`FloatMatrixVO`](docs/value-objects/FloatMatrixVO.md)
 - [`LocationIqBaseUrl`](docs/enums/LocationIqBaseUrl.md)
 - [`DirectionsProfile`](docs/enums/DirectionsProfile.md)
 - [`OverviewType`](docs/enums/OverviewType.md)
 - [`GeometriesType`](docs/enums/GeometriesType.md)
+- [`MatrixAnnotation`](docs/enums/MatrixAnnotation.md)
+- [`FallbackCoordinate`](docs/enums/FallbackCoordinate.md)
 - [`NominatimBaseUrl`](docs/enums/NominatimBaseUrl.md)
 - [`NominatimFormat`](docs/enums/NominatimFormat.md)
 
@@ -719,3 +936,4 @@ Documentation détaillée de chaque composant :
 ## Licence
 
 MIT © Andy Defer
+---

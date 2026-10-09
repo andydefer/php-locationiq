@@ -6,9 +6,11 @@ namespace AndyDefer\PhpLocationIq\Contracts;
 
 use AndyDefer\PhpLocationIq\Contracts\Responses\BalanceResponseInterface;
 use AndyDefer\PhpLocationIq\Contracts\Responses\DirectionsResponseInterface;
+use AndyDefer\PhpLocationIq\Contracts\Responses\MatrixResponseInterface;
 use AndyDefer\PhpLocationIq\Contracts\Responses\TimezoneResponseInterface;
 use AndyDefer\PhpLocationIq\Enums\LocationIqBaseUrl;
 use AndyDefer\PhpLocationIq\Records\DirectionsRecord;
+use AndyDefer\PhpLocationIq\Records\MatrixRecord;
 use AndyDefer\PhpLocationIq\Records\TimezoneRecord;
 
 /**
@@ -43,6 +45,14 @@ interface LocationIqClientInterface
      * @param  DirectionsRecord  $record  Routing parameters and coordinates.
      */
     public function getDirections(DirectionsRecord $record): DirectionsResponseInterface;
+
+    /**
+     * Computes the fastest route duration and/or distance between all
+     * pairs of supplied coordinates.
+     *
+     * @param  MatrixRecord  $record  Routing parameters and coordinates.
+     */
+    public function getMatrix(MatrixRecord $record): MatrixResponseInterface;
 
     /**
      * Returns the remaining request credits for the current UTC day.

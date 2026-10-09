@@ -11,23 +11,27 @@ use AndyDefer\PhpClient\Enums\ContentType;
 use AndyDefer\PhpLocationIq\Contracts\LocationIqClientInterface;
 use AndyDefer\PhpLocationIq\Contracts\Responses\BalanceResponseInterface;
 use AndyDefer\PhpLocationIq\Contracts\Responses\DirectionsResponseInterface;
+use AndyDefer\PhpLocationIq\Contracts\Responses\MatrixResponseInterface;
 use AndyDefer\PhpLocationIq\Contracts\Responses\TimezoneResponseInterface;
 use AndyDefer\PhpLocationIq\Enums\LocationIqBaseUrl;
 use AndyDefer\PhpLocationIq\Records\DirectionsRecord;
+use AndyDefer\PhpLocationIq\Records\MatrixRecord;
 use AndyDefer\PhpLocationIq\Records\TimezoneRecord;
 use AndyDefer\PhpLocationIq\Requests\BalanceRequest;
 use AndyDefer\PhpLocationIq\Requests\DirectionsRequest;
+use AndyDefer\PhpLocationIq\Requests\MatrixRequest;
 use AndyDefer\PhpLocationIq\Requests\TimezoneRequest;
 use AndyDefer\PhpLocationIq\Responses\BalanceResponse;
 use AndyDefer\PhpLocationIq\Responses\DirectionsResponse;
+use AndyDefer\PhpLocationIq\Responses\MatrixResponse;
 use AndyDefer\PhpLocationIq\Responses\TimezoneResponse;
 
 /**
  * HTTP client for the LocationIQ API.
  *
- * Provides typed access to the Balance, Timezone, and Directions endpoints.
- * Requests are dispatched through a {@see ClientInterface}, allowing the
- * transport layer to be swapped for testing or instrumentation.
+ * Provides typed access to the Balance, Timezone, Directions, and Matrix
+ * endpoints. Requests are dispatched through a {@see ClientInterface},
+ * allowing the transport layer to be swapped for testing or instrumentation.
  *
  * @see https://locationiq.com/docs
  */
@@ -95,6 +99,21 @@ class LocationIqClient implements LocationIqClientInterface
             $request->getUrl()->getValue(),
             $request,
             DirectionsResponse::class
+        );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getMatrix(MatrixRecord $record): MatrixResponseInterface
+    {
+        $request = new MatrixRequest($record, $this->baseUrl, $this->apiKey);
+        $this->configureRequest($request);
+
+        return $this->client->get(
+            $request->getUrl()->getValue(),
+            $request,
+            MatrixResponse::class
         );
     }
 

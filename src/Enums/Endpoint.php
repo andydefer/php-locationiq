@@ -10,6 +10,7 @@ enum Endpoint: string
 {
     case TIMEZONE = '/v1/timezone';
     case DIRECTIONS = '/v1/directions/{profile}/{coordinates}';
+    case MATRIX = '/v1/matrix/{profile}/{coordinates}';
     case BALANCE = '/v1/balance';
 
     public function method(): HttpMethod
@@ -17,6 +18,7 @@ enum Endpoint: string
         return match ($this) {
             self::TIMEZONE,
             self::DIRECTIONS,
+            self::MATRIX,
             self::BALANCE => HttpMethod::GET,
         };
     }

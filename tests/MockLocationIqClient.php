@@ -93,6 +93,46 @@ final class MockLocationIqClient extends LocationIqClient
         // Le code d'erreur est porté par "code" et non par "error"
     }
 
+    /**
+     * Appends a successful Matrix response to the mock queue.
+     *
+     * @param  array<int, array<int, float|null>>|null  $durations  Durations matrix (seconds).
+     * @param  array<int, array<int, float|null>>|null  $distances  Distances matrix (meters).
+     * @param  array<int, array<string, mixed>>  $sources  Resolved source waypoints.
+     * @param  array<int, array<string, mixed>>  $destinations  Resolved destination waypoints.
+     */
+    public function addMatrixSuccessResponse(
+        ?array $durations = null,
+        ?array $distances = null,
+        array $sources = [],
+        array $destinations = [],
+    ): void {
+        $payload = ['code' => 'Ok'];
+
+        if ($durations !== null) {
+            $payload['durations'] = $durations;
+        }
+
+        if ($distances !== null) {
+            $payload['distances'] = $distances;
+        }
+
+        $payload['sources'] = $sources;
+        $payload['destinations'] = $destinations;
+
+        $this->addSuccessResponse($payload);
+    }
+
+    /**
+     * Appends a Matrix error response to the mock queue.
+     *
+     * @param  string  $code  Error code (`NoTable`, `NotImplemented`, ...).
+     */
+    public function addMatrixErrorResponse(string $code): void
+    {
+        $this->addSuccessResponse(['code' => $code]);
+    }
+
     public function getMockHandler(): MockHandler
     {
         return $this->mockHandler;
