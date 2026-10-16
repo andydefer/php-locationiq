@@ -21,7 +21,7 @@
     ],
     "require": {
         "php": "^8.2",
-        "andydefer/php-services": "^1.6.34",
+        "andydefer/php-services": "^1.6.35",
         "jenssegers/agent": "^2.6"
     },
     "require-dev": {
