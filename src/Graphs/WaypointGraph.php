@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AndyDefer\PhpLocationIq\Graphs;
 
 use AndyDefer\PhpClient\Abstracts\Graph;
-use AndyDefer\PhpLocationIq\ValueObjects\LocationVO;
+use AndyDefer\PhpVo\ValueObjects\LocationVO;
 
 final class WaypointGraph extends Graph
 {

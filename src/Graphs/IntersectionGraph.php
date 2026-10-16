@@ -6,7 +6,7 @@ namespace AndyDefer\PhpLocationIq\Graphs;
 
 use AndyDefer\DomainStructures\Collections\Utility\IntTypedCollection;
 use AndyDefer\PhpClient\Abstracts\Graph;
-use AndyDefer\PhpLocationIq\ValueObjects\LocationVO;
+use AndyDefer\PhpVo\ValueObjects\LocationVO;
 
 final class IntersectionGraph extends Graph
 {

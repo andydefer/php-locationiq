@@ -6,7 +6,7 @@ namespace AndyDefer\PhpLocationIq\Graphs\Nominatim;
 
 use AndyDefer\PhpClient\Abstracts\Graph;
 use AndyDefer\PhpLocationIq\ValueObjects\BoundingBoxVO;
-use AndyDefer\PhpLocationIq\ValueObjects\LocationVO;
+use AndyDefer\PhpVo\ValueObjects\LocationVO;
 
 final class ReverseGraph extends Graph
 {

@@ -6,7 +6,7 @@ namespace AndyDefer\PhpLocationIq\Datas;
 
 use AndyDefer\DomainStructures\Abstracts\AbstractData;
 use AndyDefer\DomainStructures\Traits\Hydratable;
-use AndyDefer\PhpLocationIq\ValueObjects\LocationVO;
+use AndyDefer\PhpVo\ValueObjects\LocationVO;
 
 final class ManeuverData extends AbstractData
 {

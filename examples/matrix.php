@@ -13,8 +13,8 @@ use AndyDefer\PhpLocationIq\Enums\FallbackCoordinate;
 use AndyDefer\PhpLocationIq\Enums\MatrixAnnotation;
 use AndyDefer\PhpLocationIq\LocationIqClient;
 use AndyDefer\PhpLocationIq\Records\MatrixRecord;
-use AndyDefer\PhpLocationIq\ValueObjects\LocationVO;
 use AndyDefer\PhpLocationIq\ValueObjects\MatrixOptionsVO;
+use AndyDefer\PhpVo\ValueObjects\LocationVO;
 
 /**
  * LocationIQ impose un délai minimum d'une seconde entre deux requêtes

@@ -18,9 +18,9 @@ use AndyDefer\PhpLocationIq\Records\MatrixRecord;
 use AndyDefer\PhpLocationIq\Records\TimezoneRecord;
 use AndyDefer\PhpLocationIq\Tests\MockLocationIqClient;
 use AndyDefer\PhpLocationIq\Tests\TestCase;
-use AndyDefer\PhpLocationIq\ValueObjects\LocationVO;
 use AndyDefer\PhpLocationIq\ValueObjects\MatrixOptionsVO;
 use AndyDefer\PhpVo\ValueObjects\CoordinatesVO;
+use AndyDefer\PhpVo\ValueObjects\LocationVO;
 use AndyDefer\PhpVo\ValueObjects\Types\FloatVO;
 
 final class LocationIqClientTest extends TestCase

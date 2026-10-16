@@ -7,7 +7,7 @@ namespace AndyDefer\PhpLocationIq\Datas\Nominatim;
 use AndyDefer\DomainStructures\Abstracts\AbstractData;
 use AndyDefer\DomainStructures\Traits\Hydratable;
 use AndyDefer\PhpLocationIq\ValueObjects\BoundingBoxVO;
-use AndyDefer\PhpLocationIq\ValueObjects\LocationVO;
+use AndyDefer\PhpVo\ValueObjects\LocationVO;
 
 final class ReverseData extends AbstractData
 {

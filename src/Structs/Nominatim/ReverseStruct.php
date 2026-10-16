@@ -7,7 +7,7 @@ namespace AndyDefer\PhpLocationIq\Structs\Nominatim;
 use AndyDefer\PhpClient\Abstracts\Struct;
 use AndyDefer\PhpLocationIq\Graphs\Nominatim\AddressGraph;
 use AndyDefer\PhpLocationIq\ValueObjects\BoundingBoxVO;
-use AndyDefer\PhpLocationIq\ValueObjects\LocationVO;
+use AndyDefer\PhpVo\ValueObjects\LocationVO;
 
 final class ReverseStruct extends Struct
 {

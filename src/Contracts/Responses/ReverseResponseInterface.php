@@ -8,7 +8,7 @@ use AndyDefer\PhpClient\Contracts\ResponseInterface;
 use AndyDefer\PhpLocationIq\Datas\Nominatim\AddressData;
 use AndyDefer\PhpLocationIq\Datas\Nominatim\ReverseResponseData;
 use AndyDefer\PhpLocationIq\ValueObjects\BoundingBoxVO;
-use AndyDefer\PhpLocationIq\ValueObjects\LocationVO;
+use AndyDefer\PhpVo\ValueObjects\LocationVO;
 
 interface ReverseResponseInterface extends ResponseInterface
 {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace AndyDefer\PhpLocationIq\Collections;
 
 use AndyDefer\DomainStructures\Abstracts\AbstractTypedCollection;
-use AndyDefer\PhpLocationIq\ValueObjects\LocationVO;
+use AndyDefer\PhpVo\ValueObjects\LocationVO;
 
 /**
  * @extends AbstractTypedCollection<LocationVO>

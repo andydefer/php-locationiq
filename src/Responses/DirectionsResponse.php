@@ -20,7 +20,7 @@ use AndyDefer\PhpLocationIq\Graphs\ManeuverGraph;
 use AndyDefer\PhpLocationIq\Graphs\RouteGraph;
 use AndyDefer\PhpLocationIq\Graphs\StepGraph;
 use AndyDefer\PhpLocationIq\Graphs\WaypointGraph;
-use AndyDefer\PhpLocationIq\ValueObjects\LocationVO;
+use AndyDefer\PhpVo\ValueObjects\LocationVO;
 
 /**
  * HTTP response for the LocationIQ Directions endpoint.

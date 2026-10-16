@@ -11,7 +11,7 @@ use AndyDefer\PhpLocationIq\Enums\GeometriesType;
 use AndyDefer\PhpLocationIq\Enums\OverviewType;
 use AndyDefer\PhpLocationIq\LocationIqClient;
 use AndyDefer\PhpLocationIq\Records\DirectionsRecord;
-use AndyDefer\PhpLocationIq\ValueObjects\LocationVO;
+use AndyDefer\PhpVo\ValueObjects\LocationVO;
 
 // ============================================================
 // CAS 1 : Avec le client
