@@ -6,7 +6,6 @@ require './vendor/autoload.php';
 require __DIR__.'/bootstrap.php';
 
 use AndyDefer\DomainStructures\Collections\Utility\IntTypedCollection;
-use AndyDefer\PhpLocationIq\Collections\LocationVOCollection;
 use AndyDefer\PhpLocationIq\Collections\MatrixAnnotationCollection;
 use AndyDefer\PhpLocationIq\Enums\DirectionsProfile;
 use AndyDefer\PhpLocationIq\Enums\FallbackCoordinate;
@@ -14,6 +13,7 @@ use AndyDefer\PhpLocationIq\Enums\MatrixAnnotation;
 use AndyDefer\PhpLocationIq\LocationIqClient;
 use AndyDefer\PhpLocationIq\Records\MatrixRecord;
 use AndyDefer\PhpLocationIq\ValueObjects\MatrixOptionsVO;
+use AndyDefer\PhpVo\Collections\LocationVOCollection;
 use AndyDefer\PhpVo\ValueObjects\LocationVO;
 
 /**

@@ -6,10 +6,10 @@ namespace AndyDefer\PhpLocationIq\Records;
 
 use AndyDefer\DomainStructures\Abstracts\AbstractRecord;
 use AndyDefer\DomainStructures\Traits\Hydratable;
-use AndyDefer\PhpLocationIq\Collections\LocationVOCollection;
 use AndyDefer\PhpLocationIq\Enums\DirectionsProfile;
 use AndyDefer\PhpLocationIq\Enums\GeometriesType;
 use AndyDefer\PhpLocationIq\Enums\OverviewType;
+use AndyDefer\PhpVo\Collections\LocationVOCollection;
 
 final class DirectionsRecord extends AbstractRecord
 {

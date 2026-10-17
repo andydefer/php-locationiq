@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AndyDefer\PhpLocationIq\Tests\Unit;
 
 use AndyDefer\DomainStructures\Collections\Utility\IntTypedCollection;
-use AndyDefer\PhpLocationIq\Collections\LocationVOCollection;
 use AndyDefer\PhpLocationIq\Collections\MatrixAnnotationCollection;
 use AndyDefer\PhpLocationIq\Enums\DirectionsProfile;
 use AndyDefer\PhpLocationIq\Enums\FallbackCoordinate;
@@ -19,6 +18,7 @@ use AndyDefer\PhpLocationIq\Records\TimezoneRecord;
 use AndyDefer\PhpLocationIq\Tests\MockLocationIqClient;
 use AndyDefer\PhpLocationIq\Tests\TestCase;
 use AndyDefer\PhpLocationIq\ValueObjects\MatrixOptionsVO;
+use AndyDefer\PhpVo\Collections\LocationVOCollection;
 use AndyDefer\PhpVo\ValueObjects\CoordinatesVO;
 use AndyDefer\PhpVo\ValueObjects\LocationVO;
 use AndyDefer\PhpVo\ValueObjects\Types\FloatVO;

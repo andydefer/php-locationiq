@@ -7,10 +7,10 @@ namespace AndyDefer\PhpLocationIq\ValueObjects;
 use AndyDefer\DomainStructures\Abstracts\AbstractValueObject;
 use AndyDefer\DomainStructures\Collections\Utility\IntTypedCollection;
 use AndyDefer\DomainStructures\Utils\StrictAssociative;
-use AndyDefer\PhpLocationIq\Collections\LocationVOCollection;
 use AndyDefer\PhpLocationIq\Collections\MatrixAnnotationCollection;
 use AndyDefer\PhpLocationIq\Enums\FallbackCoordinate;
 use AndyDefer\PhpLocationIq\Enums\MatrixAnnotation;
+use AndyDefer\PhpVo\Collections\LocationVOCollection;
 use InvalidArgumentException;
 
 /**
